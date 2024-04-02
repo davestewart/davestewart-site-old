@@ -1,99 +1,502 @@
 ---
-description: Build sites that scale by structuring code by domain, not responsibility
+description: Build sites that scale by structuring code by domain, not concern
 xdate: 2024-03-08
+preview: true
 media:
   opengraph: ./featured.png
   featured: ./featured.png
   thumbnail: ./thumbnail.png
 ---
 
-# Modular site architecture using Nuxt layers
-
-## Abstract
-
-This post is about structuring Nuxt sites so they're easier to manage once they grow past a few 
+# Modular site architecture with Nuxt layers
 
 ## Intro
 
-As small sites grow into big sites it becomes increasingly difficult to locate, understand, and reason about the files, functionality and responsibilities within. Usually, this is because starter templates group files by responsibility:
+Nuxt 3 introduces a new paradigm called "layers" that is described in the docs as "a powerful system that allows you to extend the default files, configs, and much more".
+
+Whilst this explanation may be _technically_ accurate, I feel the emphasis on "extending" misses a simpler and more everyday use case; that of "siloing" application functionality as self-contained domain-driven units.
+
+In the following article I'll outline building domain-driven sites with Nuxt layers:
+
+- I'll start with [reviewing](#a-review-of-site-structure) traditional application structures 
+- Then I'll [introduce](#nuxt-layers-intro) Nuxt layers to separate site or application concerns by domain
+- Finally we'll [explore](#real-world-layers-development) real world techniques to get up and running quickly
+
+## A review of site structure
+
+Let's take a look at the two main ways to structure sites and apps; by [concern](#by-concern) and by [domain](#by-domain).
+
+### By concern
+
+Most projects are born from starter templates which – for simplicity's sake – tend to group files by concern:
 
 ```
-+- site
++- src
     +- components
     |   +- blog
     |   +- home
-    +- pages
+    +- content
     |   +- blog
-    |   +- home
+    +- pages
+    |   +- blog.vue
+    |   +- home.vue
     +- ...
 ```
 
-However, past a certain point it becomes more intuitive to group files by _domain_ or _feature_:
+Because smaller sites haven't yet got to a size where they need organisation, folders and files are added as needed and it's reasonably easy to keep track of.
+
+However, as sites grow in size it becomes increasingly difficult to grok the relations and functionality striped across the application's many top-level folders, not to mention an increasingly-sprawling root-level config file.
+
+### By domain
+
+At a certain size of site it becomes more intuitive to silo files by domain:
 
 ```
-+- site
++- src
+    +- blog
+    |   +- components
+    |   +- content
+    |   +- pages
     +- home
     |   +- components
     |   +- pages
-    +- blog
-    |   +- components
-    |   +- pages
     +- ...
 ```
 
-Grouping files this way has myriad benefits:
+Transposing "domains" for "concerns" has myriad benefits.
 
-- the code you need will be located in a sibling folder
+File management:
+
+- domains are self-contained thanks to the natural siloing
+- the code you need is generally located in a sibling folder
 - less open folders / scrolling / jumping in your IDE
-- silos are self-contained thanks to the domain-based nature
-- domain code / config is separated from core code / config
-- simpler, domain smaller entry points, rather than once huge config file
-- less muddling of global and local concerns
+
+Configuration and settings:
+
+- domain config is discrete from from global config
+- simpler, smaller, domain entry points, rather than one huge config file
+- minimal mixing of global and local concerns
+
+Developer experience:
+
 - PRs are simpler as most files will exist downstream from a common folder
-- you can more easily introduce new features or site sections
+- you can more easily develop new features or site sections
 - you can more easily turn complete features on / off
 
-In this article I'll share my [commercial experience](/work/) developing modular architectures, then share how I leveraged Nuxt 3's Layers to migrate an existing Nuxt 3 project to this new modular architecture.
+The paradigm shift from concerns to domains may feel familiar to you if you moved from Vue's Options API to the Composition API; rather than related functionality being striped across a huge options-based file, it gets declared together and can be treated as a single, self-contained unit.
 
-## Modularity and Nuxt Layers
+> Note that the choice of words "domain" and "concern" could easily be "feature" and "responsibility" or whatever else makes sense to you.
 
-You're probably familiar with high-level modularization such as [Node modules](https://www.npmjs.com/), [Vue Plugins](https://vuejs.org/guide/reusability/plugins), or [Nuxt Modules](https://nuxt.com/docs/guide/concepts/modules).
+##  Nuxt layers intro
 
-These are all officially-architected ways to develop smaller parts of code in isolation from a larger system, with an agreed contract between module and framework so the code can be imported, spliced-in and called when needed.
+### Demo repo
 
-Whilst this is great, it doesn't address the architectural issue mentioned above, and this is where [Nuxt Layers](https://nuxt.com/docs/getting-started/layers) comes in; each layer is effectively a mini Nuxt application (or even _part_ of an application) and Nuxt stitches each's `components`, `pages`, etc together to work as a larger whole.
+For the purpose of the article, I've prepared a Nuxt 3 repository which demonstrates the concepts and techniques covered in the rest of the article:
 
-The advantage of this is you can much more easily define the boundaries within your app, and work on much smaller, self-contained sets of files, such as `/common`, `/home`, `/products`, and so on.
+- [github.com/davestewart/nuxt-layers-demo](https://github.com/davestewart/nuxt-layers-demo)
+
+### Preface
+
+To avoid parroting what has already been written, it might be a good idea to skim the docs before continuing:
+
+- [Get Started » Layers](https://nuxt.com/docs/getting-started/layers)
+- [Guide » Authoring Nuxt Layers](https://nuxt.com/docs/guide/going-further/layers)
+
+Note that the docs primarily discuss  _extending_ (from a theme or such like) whereas this article is more about modularising (to silo complex functionality).
+
+However, I have [linked](#resources) to resources at the end of the article which discuss extending in more detail.
+
+### Layers 101
+
+Nuxt layers can be thought of as kind of "mini" applications which are stitched together to form the complete app.
+
+Each layer:
+
+- must contain a `nuxt.config.ts` file
+- may contain `pages`, `components`, `server` folders, etc
+
+Folders within each layer work exactly the same way as a regular Nuxt app, with routes being constructed, config being read, etc.
+
+For example, a small personal site might be modeled like so:
+
+```
++- src
+    +- base                          <-- global, shared or one-off functionality
+    |   +- ...
+    +- blog                          <-- nuxt content configuration, markdown articles
+    |   +- ...
+    +- home                          <-- one-off components, animation plugin and configuration
+    |   +- components
+    |   |   +- Hero.vue
+    |   |   +- Services.vue
+    |   |   +- Testimonials.vue
+    |   |   +- ...
+    |   +- pages
+    |   |   +- index.vue
+    |   +- plugins
+    |   |   +- ...
+    |   +- nuxt.config.ts
+    +- ...
+    +- nuxt.config.ts 
+```
+
+The top level layers or "domains" would each have their own roles:
+
+- `base` would silo shared concerns such as `assets`, `layouts`, etc.
+- `blog` would configure Nuxt Content and contain a tree of articles
+- `home` might contain animation `plugins`, `config` and `components` only used for a landing page
+
+Finally, the root-level `nuxt.config.ts` file instructs Nuxt to merge all configurations via the `extends` keyword:
+
+```ts
+export default defineNuxtConfig({
+  extends: [
+    './base',
+    './blog',
+    './home',
+  ]
+})
+```
+
+Note that the `extends` functionality is courtesy of the [unjs/c12](https://github.com/unjs/c12?tab=readme-ov-file#extending-configuration) configuration library.
+
+## Real world layers development
+
+Now that you've seen the basics of a modular layered site, let's address the sorts of issues you might trip over in your first few hours of migrating an existing or building a new site:
+
+- [Folder structure](#folder-structure)
+- [Global concerns](#global-concerns)
+- [Framework folders](#framework-folders)
+- [Imports and exports](#imports-and-exports)
+- [Config](#config)
+- [Routing](#routing)
+- [Nuxt Content](#nuxt-content)
+
+### Folder structure
+
+My currently-preferred structure for layers is a flat hierarchy of top-level folders. 
+
+But layers are completely flexible, so if you preferred, you could layer only the domains you wanted:
+
+```
++- src
+    +- assets
+    +- layers
+    |   +- blog
+    |   |   +- ...
+    |   +- home
+    |       +- ...
+    +- layouts
+    +- plugins
+    +- components
+    +- nuxt.config.ts
+```
+```ts
+// src/nuxt.config.ts
+export default defineNuxtConfig({
+  extends: [
+    './layers/blog',
+    './layers/home',
+  ]
+})
+```
+
+Note that layers can [reference](https://nuxt.com/docs/getting-started/layers#usage) NPM packages and GitHub repos – but for the purpose of this article I'm intentionally sticking with a flat file structure and local folder references.
+
+### Global concerns
+
+Almost as soon as you begin shuffling folders around you're left with folders that don't seem to have an obvious home.
+
+For folders I consider to have more of a supporting role or are only occasionally edited, I move to `base`:
+
+```
++- src
+    +- base
+    |   +- middleware
+    |   +- modules
+    |   +- public
+    |   +- styles
+    |   +- utils
+    +- ... 
+```
+
+As it starts with "b" it generally sits at the top of the tree so I can just ignore it, or if I need it, I know it's top of the list.
+
+If a concern spans multiple domains, or isn't specific enough to get its own domain, `site` feels like a nice bucket:
+
+```
++- src
+    +- ... 
+    +- site
+        +- components
+        |   +- Footer.vue
+        |   +- Header.vue
+        +- pages
+        |   +- about.vue
+        |   +- contact.vue
+        +- ...
+```
+
+It generally sits at the bottom of the tree, so I can leave it open if I need to dip in and out.
+
+However, where and how to draw your domain boundaries is [an entirely subjective question](https://github.com/nuxt/nuxt/issues/26444) – but the bottom line is _do what works for your project_ – and don't be afraid to iterate; what feels right today might feel outdated next week.
+
+### Framework folders
+
+Core framework folders [within layers](https://nuxt.com/docs/guide/going-further/layers) are auto-scanned and work as expected:
+
+```
++- src 
+    +- some-layer
+        +- components
+        +- composables
+        +- layouts
+        +- pages
+        +- plugins
+        +- server
+        +- utils
+```
+
+For example:
+
+- `pages` creates navigable [routes](https://nuxt.com/docs/guide/directory-structure/pages)
+- `server/api` creates callable [endpoints](https://nuxt.com/docs/guide/directory-structure/server#server-routes)
+- `components` are [auto-imported](https://nuxt.com/docs/guide/concepts/auto-imports)
+
+This means you can break out concerns across domains as you see fit – and Nuxt will stitch them back together again.
+
+### Imports and exports
+
+Given that layers are generally self-contained, importing becomes much simper:
+
+```ts
+// home/components/Hero.vue
+import { queryUser } from '../services'
+```
+
+If you want to import from another layer – and you opted for a flat layer structure – you essentially get aliases for free:
+
+```ts
+import { queryUser } from '~/dashboard/services'
+```
+
+If you want to expose only certain dependencies from a layer, consider an index file:
+
+```ts
+// src/dashboard/index.ts
+export * from './services/foo'
+export * from './utils/bar'
+```
+```ts
+// src/profile/components/User.ts
+import { queryUser } from '~/dashboard'
+```
+
+Though, remember auto-imports work with layers, so often you may not need to import anything at all.
+
+### Config
+
+One of my favourite features of layers is localised config.
+
+It makes it so much easier to declare and isolate domain specific plugins, configuration and settings, without having to structure and navigate a sprawling, ever-expanding global config.
+
+For global or one-off settings and plugins I prefer a `base` layer as noted above:
+
+```ts
+// src/base/nuxt.config.ts
+export default defineNuxtConfig({
+  alias: { ... },
+  runtimeConfig: { ... },
+  nitro: { ... },
+  ...
+})
+```
+
+(Though you could just as easily add this to the root nuxt config).
+
+For domain-specific configuration, you can add it directly to a layer:
+
+```ts
+// src/blog/nuxt.config.ts
+export default defineNuxtConfig({
+  modules: [
+    ['fooify', {
+      paths: [
+        `~/blog/foo/*`,
+      ]
+    }]
+  ]
+})
+```
+
+For complex configuration that may differ only _slightly_ across layers, consider abstracting to helpers:
+
+```ts
+// src/base/utils/layers.ts
+export function defineFooConfig (layer: string) {
+  return {
+    modules: [
+      ['fooify', {
+        paths: [
+          `~/${layer}/foo/*`
+        ]
+      }]
+    ]
+  }
+}
+```
+
+And within layers:
+
+```ts
+// src/blog/nuxt.config.ts
+import { defineFooConfig } from '../base/utils/layers'
+
+export default {
+  ...defineFooConfig('blog'),
+}
+```
+```ts
+// src/home/nuxt.config.ts
+import { defineFooConfig } from '../base/utils/layers'
+
+export default {
+  ...defineFooConfig('home'),
+}
+```
+
+> Note that you cannot use path aliases such as `~` in config `import` statements – because the config file itself has not yet been compiled – so the `~` is not yet available in Vite .
+
+Nuxt should intelligently merge configs (via [unjs/defu](https://github.com/unjs/defu)) rather than overwriting previously-declared layer configs:
+
+```ts
+// compiled nuxt config
+{
+  modules: [
+    ['fooify', {
+      paths: [
+        `~/blog/foo/*`,
+        `~/home/foo/*`,
+      ],
+    }],
+  ]
+}
+```
+
+### Routing
+
+Note that layers can happily contain their own routes.
+
+However, `pages` folders must contain **full folder routes** as the layer name is **not** automatically prepended:
+
+```
++- src
+    +- blog
+    |   +- pages                <-- route starts here
+    |       +- blog
+    |           +- index.vue
+    |           +- ...
+    +- home
+        +- pages                <-- route starts here
+            +- index.vue
+```
+
+Another option might be [adding routes dynamically](https://nuxt.com/docs/api/nuxt-config#options) –  but it's almost certainly not worth the hassle. 
+
+### Nuxt Content
+
+Nuxt Layers also play nice with Nuxt Content.
+
+This allows you to silo content along with its related `pages`, `components`, `services`, etc. rather than treat content as a global concern – which is great if your site has different-but-distinct content-driven sections such as Blog, Guide, etc.:
+
+```
++- src
+    +- blog
+    |   +- ...
+    +- guide
+        +- components
+        |   +- ...
+        +- content
+        |   +- index.md
+        |   +- ...
+        +- layouts
+        |   +- ...
+        +- pages
+        |   +- ...
+        +- nuxt.config.ts
+
+```
+
+Note that unlike [routes](#routing) you **can** configure content without re-nesting the folder.
+
+To make it work you need to define each layer's `content` with a new `source`:
+
+```ts
+// src/blog/nuxt.config.ts
+export default defineNuxtConfig ({
+  content: {
+    sources: {
+      blog: { ... }
+    }
+  }
+})
+```
+
+The `sources` boilerplate is a little bulky, so for multiple layers you can abstract to a helper (as [previously](#config) outlined):
+
+```ts
+// src/base/utils/layers.ts
+export function defineContentConfig (name: string) {
+  return {
+    content: {
+      sources: {
+        [name]: {
+          driver: 'fs',
+          base: `./${name}/content`,
+          prefix: `/${name}`,
+        }
+      },
+    }
+  }
+}
+```
+```ts
+// src/blog/nuxt.config.ts
+import { defineContentConfig } from '../base/utils/layers'
+
+export defineNuxtConfig ({
+  ...defineContentConfig('blog')
+})
+```
+
+### Summing up
+
+Hopefully this section gives you some solid ideas on how to modularise your site or app, and if I've missed anything, some ideas on how to approach it.
 
 
-## Modularity and JavaScript
+<!--
+## Other options for modularity
 
-I thought it would be interesting to cover my own experiences of developing more modular architectures in Vue, as it's something I've been thinking about and implementing for a number of years now.
+Siloing sites this way is can be accomplished at build time using Webpack, Vite, and now Nuxt.
 
-***Feel free to skip this section if you're just here for the Nuxt content!***
+It should be noted that Nuxt 3's layers are not exclusive to Nuxt 3; 
 
-### Intro
-
-I was first exposed to very large frontend applications when I worked on backoffice systems for [Clear Bank](/work/clearbank/) in 2018.
-
-Their system was huge; mirroring the bank's extensive API and business domains, yet the core architecture was the same `routes`, `components`, `store`, `views` folders spawned from  `vue create app` but with similar (yet subtly different!) sub-folder structures nested in each.
-
-This meant a lot of folder traversal, access to code via a few top-level entry points, and potential fragility. Refactoring related concerns was risky as it wasn't immediatly clear what other dependencies might be affected, and onboarding was tough as you effectively had to say "jump in and explore, *but try not to break anything*".
-
-### Vue / JS
-
-I was fairly sure I could make inroads into clarifying the overal application structure, and the first step was breaking out the monolithic routes file into files matching the top-level views folders.
-
-Next was attempting to make a lot more of the app local. Rather than having every `view` dependent on a global Vuex file, we started moving state local to the views. After this came config, and services, so each "module" of the app would import from a local `index` file, rather than having to reach all the way out to various global dependencies.
-
-Whilst 
-
-### Webpack
-
-For [Asterisk](/work/asterisk/#modular-build) I got to test this out
-
-For [Control Space](/products/control-space) I took this a step further
+### Nuxt 3
 
 ### Nuxt 2
 
-For [FGH](/work/fgh) as we scaled from a small to medium application, I created [Nuxt Areas](/projects/open-source/nuxt-areas/) 
+### Package managers
+
+### Build tools
+
+-->
+
+## Last words
+
+Kudos to the UnJS and Nuxt team for the work they've done here.
+
+
+## Resources
+
+Links to resources here
+
