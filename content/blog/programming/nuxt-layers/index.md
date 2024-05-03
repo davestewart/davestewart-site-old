@@ -10,6 +10,7 @@ media:
 
 # Modular site architecture with Nuxt layers
 
+> Everything you wanted to know about Nuxt Layers but were too afraid to ask
 ## Intro
 
 Nuxt 3 introduces a new paradigm called "layers" that is described in the docs as "a powerful system that allows you to extend the default files, configs, and much more".
@@ -183,6 +184,62 @@ My currently-preferred structure for layers is a flat hierarchy of top-level fol
 
 But layers are completely flexible, so if you preferred, you could layer only specific concerns:
 
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Flat</th>
+<th style="text-align:center">Split</th>
+<th style="text-align:center">Partial</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<pre class="language-text"><code>+- src
+    +- blog
+    |   +- ...
+    +- core
+    |   +- ...
+    +- home
+    |   +- ...
+    |
+    +- nuxt.config.ts
+</code></pre>
+</td>
+<td>
+<pre class="language-text"><code>+- src
+    +- core
+    |   +- ...
+    |
+    +- layers
+    |   +- blog
+    |   |   +- ...
+    |   +- home
+    |       +- ...
+    |
+    +- nuxt.config.ts
+</code></pre>
+</td>
+<td>
+<pre class="language-text"><code>+- src
+    +- assets
+    |
+    +- layers
+    |   +- blog
+    |   |   +- ...
+    |   +- home
+    |       +- ...
+    |
+    +- layouts
+    +- plugins
+    +- components
+    +- nuxt.config.ts
+</code></pre>
+</td>
+</tr>
+</tbody>
+</table>
+
 ```
 +- src
     +- assets
@@ -196,6 +253,7 @@ But layers are completely flexible, so if you preferred, you could layer only sp
     +- components
     +- nuxt.config.ts
 ```
+
 ```ts
 // src/nuxt.config.ts
 export default defineNuxtConfig({
