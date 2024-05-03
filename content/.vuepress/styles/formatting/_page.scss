@@ -224,16 +224,21 @@ table {
 
   th, td {
     text-align: left;
-    padding: .25em 1em;
+    padding: .25em .5em;
   }
 
   th {
     font-weight: 700;
     font-family: $titleFont;
-    color: $accentColor
+    color: $accentColor;
+    vertical-align: middle;
   }
 
   td:first-child {
+    white-space: nowrap;
+  }
+
+  td a:has(code) {
     white-space: nowrap;
   }
 }
