@@ -43,25 +43,24 @@ Note that:
 - some config settings require additional work to work the same as if they were in the root
 - there can only be **one** of certain kinds of folders
 
-
 The following table gives you an overview of these factors, along with some notes:
 
-| One  | Config Setting                                               | Setting Description                                          | Layer Folder     | Layer Description                                |
-| :--: | ------------------------------------------------------------ | ------------------------------------------------------------ | ---------------- | ------------------------------------------------ |
-|  x   | [`dir.assets`](https://nuxt.com/docs/api/nuxt-config#assets) | The assets directory (aliased as `~assets` in your build)    |                  |                                                  |
-|      | [`components`](https://nuxt.com/docs/api/nuxt-config#components) | Configure Nuxt component auto-registration.                  | `components/*`   | Extend the default components                    |
-|      | [`imports.dirs`](https://nuxt.com/docs/api/nuxt-config#dirs) | An array of custom directories that will be auto-imported. Note that this option will not override the default directories (`~/composables`, `~/utils`). | `composables/*`  | Extend the default composables                   |
-|      | [`dir.layouts`](https://nuxt.com/docs/api/nuxt-config#layouts) | The layouts directory, each file of which will be auto-registered as a Nuxt layout. | `layouts/*`      | Extend the default layouts                       |
-|      | [`dir.middleware`](https://nuxt.com/docs/api/nuxt-config#middleware) | The middleware directory, each file of which will be auto-registered as a Nuxt middleware. |                  |                                                  |
-|  x   | [`dir.modules`](https://nuxt.com/docs/api/nuxt-config#modules) | The modules directory, each file in which will be auto-registered as a Nuxt module. |                  |                                                  |
-|      | [`dir.pages`](https://nuxt.com/docs/api/nuxt-config#pages)   | The directory which will be processed to auto-generate your application page routes. | `pages/*`        | Extend the default pages                         |
-|      | [`dir.plugins`](https://nuxt.com/docs/api/nuxt-config#plugins) | The plugins directory, each file of which will be auto-registered as a Nuxt plugin. | `plugins/*`      | Extend the default plugins                       |
-|      | [`plugins`](https://nuxt.com/docs/api/nuxt-config#plugins-1) | An array of nuxt app plugins. Each plugin can be a string (which can be an absolute or relative path to a file). |                  |                                                  |
-|  x   | [`dir.public`](https://nuxt.com/docs/api/nuxt-config#public) | The directory containing your static files, which will be directly accessible via the Nuxt server and copied across into your dist folder when your app is generated. |                  |                                                  |
-|      | [`serverDir`](https://nuxt.com/docs/api/nuxt-config#serverdir) | Define the server directory of your Nuxt application, where Nitro routes, middleware and plugins are kept. | `server/*`       | Extend the default server endpoints & middleware |
-|      |                                                              |                                                              | `utils/*`        | Extend the default utils                         |
-|      |                                                              |                                                              | `nuxt.config.ts` | Extend the default nuxt config                   |
-|      |                                                              |                                                              | `app.config.ts`  | Extend the default app config                    |
+| One | Config Setting                                                       | Layer Folder     | Setting Description                                                                                                                                                   | Layer Description                                |
+|:---:|----------------------------------------------------------------------|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
+|  x  | [`dir.assets`](https://nuxt.com/docs/api/nuxt-config#assets)         |                  | The assets directory (aliased as `~assets` in your build)                                                                                                             |                                                  |
+|     | [`dir.layouts`](https://nuxt.com/docs/api/nuxt-config#layouts)       | `layouts/*`      | The layouts directory, each file of which will be auto-registered as a Nuxt layout.                                                                                   | Extend the default layouts                       |
+|     | [`dir.middleware`](https://nuxt.com/docs/api/nuxt-config#middleware) |                  | The middleware directory, each file of which will be auto-registered as a Nuxt middleware.                                                                            |                                                  |
+|  x  | [`dir.modules`](https://nuxt.com/docs/api/nuxt-config#modules)       |                  | The modules directory, each file in which will be auto-registered as a Nuxt module.                                                                                   |                                                  |
+|     | [`dir.pages`](https://nuxt.com/docs/api/nuxt-config#pages)           | `pages/*`        | The directory which will be processed to auto-generate your application page routes.                                                                                  | Extend the default pages                         |
+|     | [`dir.plugins`](https://nuxt.com/docs/api/nuxt-config#plugins)       | `plugins/*`      | The plugins directory, each file of which will be auto-registered as a Nuxt plugin.                                                                                   | Extend the default plugins                       |
+|  x  | [`dir.public`](https://nuxt.com/docs/api/nuxt-config#public)         |                  | The directory containing your static files, which will be directly accessible via the Nuxt server and copied across into your dist folder when your app is generated. |                                                  |
+|     | [`components`](https://nuxt.com/docs/api/nuxt-config#components)     | `components/*`   | Configure Nuxt component auto-registration.                                                                                                                           | Extend the default components                    |
+|     | [`imports.dirs`](https://nuxt.com/docs/api/nuxt-config#dirs)         | `composables/*`  | An array of custom directories that will be auto-imported. Note that this option will not override the default directories (`~/composables`, `~/utils`).              | Extend the default composables                   |
+|     | [`plugins`](https://nuxt.com/docs/api/nuxt-config#plugins-1)         |                  | An array of nuxt app plugins. Each plugin can be a string (which can be an absolute or relative path to a file).                                                      |                                                  |
+|     | [`serverDir`](https://nuxt.com/docs/api/nuxt-config#serverdir)       | `server/*`       | Define the server directory of your Nuxt application, where Nitro routes, middleware and plugins are kept.                                                            | Extend the default server endpoints & middleware |
+|     |                                                                      | `utils/*`        |                                                                                                                                                                       | Extend the default utils                         |
+|     |                                                                      | `nuxt.config.ts` |                                                                                                                                                                       | Extend the default nuxt config                   |
+|     |                                                                      | `app.config.ts`  |                                                                                                                                                                       | Extend the default app config                    |
 
 One other thing to bear in mind is that when you move files to layers, aliases may (or may not!) becomeinvalid:
 
@@ -97,15 +96,15 @@ There is also the factor of whether the configuration option is recursive by def
 
 The following table outlines the differences between the various config options:
 
-| Name                                                         | Abs  | Alias | Root | Layer | Glob | Rec. | Notes                                            |
-| ------------------------------------------------------------ | :--: | :---: | :--: | :---: | :--: | :--: | ------------------------------------------------ |
-| [`extends`](https://nuxt.com/docs/api/nuxt-config#extends)   |      |       |  ●   |   ●   |      |      | Layers can be nested (mainly useful for modules) |
-| [`modules`](https://nuxt.com/docs/api/nuxt-config#modules)   |  ●   |       |      |       |      |      |                                                  |
-| [`dir.*`](https://nuxt.com/docs/api/nuxt-config#dir)         |  ●   |       |  ●   |       |      |      |                                                  |
-| [`dir.public`](https://nuxt.com/docs/api/nuxt-config#public) |  ●   |       |  ●   |       |      |      | First public folder found wins                   |
-| [`imports.dirs`](https://nuxt.com/docs/api/nuxt-config#dirs) |      |       |  ●   |       |      |      | Only supported in root config                    |
-| [`components`](https://nuxt.com/docs/api/nuxt-config#components) |      |   ●   |      |       |      |      |                                                  |
-| [`plugins`](https://nuxt.com/docs/api/nuxt-config#plugins-1) |  ●   |   ●   |  ●   |       |      |      |                                                  |
+| Name                                                             | Abs | Alias | Root | Layer | Glob | Rec. | Notes                                            |
+|------------------------------------------------------------------|:---:|:-----:|:----:|:-----:|:----:|:----:|--------------------------------------------------|
+| [`extends`](https://nuxt.com/docs/api/nuxt-config#extends)       |     |       |  ●   |   ●   |      |      | Layers can be nested (mainly useful for modules) |
+| [`modules`](https://nuxt.com/docs/api/nuxt-config#modules)       |  ●  |       |      |       |      |      |                                                  |
+| [`dir.*`](https://nuxt.com/docs/api/nuxt-config#dir)             |  ●  |       |  ●   |       |      |      |                                                  |
+| [`dir.public`](https://nuxt.com/docs/api/nuxt-config#public)     |  ●  |       |  ●   |       |      |      | First public folder found wins                   |
+| [`imports.dirs`](https://nuxt.com/docs/api/nuxt-config#dirs)     |     |       |  ●   |       |      |      | Only supported in root config                    |
+| [`components`](https://nuxt.com/docs/api/nuxt-config#components) |     |   ●   |      |       |      |      |                                                  |
+| [`plugins`](https://nuxt.com/docs/api/nuxt-config#plugins-1)     |  ●  |   ●   |  ●   |       |      |      |                                                  |
 
 Some things to bear in mind about paths in Nuxt / Node:
 
