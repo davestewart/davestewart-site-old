@@ -1,8 +1,6 @@
 ---
-shortTitle: Nuxt Layers
 description: Build sites that scale by structuring code by domain, not concern
 date: 2024-05-14
-preview: true
 media:
   opengraph: ./images/opengraph.png
   featured: ./images/featured.png
