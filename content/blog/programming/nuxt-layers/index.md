@@ -639,9 +639,9 @@ Make a plan to work on:
 - global concerns, such as `base`
 - specific domains, such as `blog`, `home`, etc 
 
-Ideally, start with:
+To start:
 
-- Use an IDE like Webstorm which rewrites your paths as you move files
+- use an IDE like Webstorm which rewrites your paths as you move files
 - create aliases for all layers
 
 Then, tackle a single domain / layer at a time:
@@ -679,12 +679,12 @@ Some additional points as you work:
 
 - commit your changes after each successful update or set of updates
 - read and understand terminal and browser console errors
-- If a change causes an error, it can be hard to track down exactly where
 
 Gotchas:
 
 - layer config watching is buggy (intermittent at best)
 - you may need to restart the dev server from time to time
+- if a change causes an error, it's not always clear why
 
 ### Tips
 
