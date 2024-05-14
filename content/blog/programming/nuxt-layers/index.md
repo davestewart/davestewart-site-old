@@ -433,7 +433,6 @@ Below, I've outlined various tips on:
 - [Path config](#path-config)
 - [Steps to migrate](#steps-to-migrate)
 - [Tips](#tips)
-- [Pros and cons](#pros-and-cons)
 
 ### Folder structure
 
@@ -609,17 +608,17 @@ export default definedNuxtConfig({
 })
 ```
 
-As it can get verbose and repetitive. 
+Is this a little verbose? Yes – but be glad it's all in one file!
 
-As such I wrote [Nuxt Layers Utils](https://github.com/davestewart/nuxt-layers-utils) which abstracts this into easy-to-use one-liners, such as:
+As it can get verbose and repetitive I wrote [Nuxt Layers Utils](https://github.com/davestewart/nuxt-layers-utils) which simplifies config to easy one-liners:
 
 ```ts
 {
-  alias: layers.alias()
+  alias: layers.alias(),
 }
 ```
 
-See the [Tips](#use-nuxt-layers-utils) section for a full example.
+See the [Tips](#tips) section for a full example.
 
 ### Steps to migrate
 
@@ -653,11 +652,10 @@ Once you've decided, tackle a single domain / layer at a time:
     - check imports as you move 
   - `components`:
     - if imported, review paths
-    - if auto-loaded, should just work
+    - if auto-imported, should just work
     - remember content components need to live in `components/content`
   - `content`
     - decide whether content will be global or local
-    - 
 - the things to check as you move are:
   - `paths`:
     - remember all [config](#config) (including layer config) is compiled at root level
@@ -668,24 +666,23 @@ Once you've decided, tackle a single domain / layer at a time:
   - `config`:
     - config `import` statements cannot use path aliases; you may need to use `../layer/concern`
 
-Bugs:
-
-- layer config watching is buggy (intermittent at best)
-- If one layer causes an error, it can be hard to track
 
 Some additional points as you work:
 
 - read and understand terminal and browser console errors
-- you may need to restart the dev server from time to time
+- If one layer causes an error, it can be hard to track
 - commit your changes after each successful layer migration
+
+Gotchas:
+
+- layer config watching is buggy (intermittent at best)
+- you may need to restart the dev server from time to time
 
 ### Tips
 
 #### Use Nuxt Layers Utils
 
-I wrote [Nuxt Layers Utils](https://github.com/davestewart/nuxt-layers-utils) to simplify the choices you need to make when refactoring a site to layers.
-
-Here's how it looks in action:
+To simplify path-related configuration, use [Nuxt Layers Utils](https://github.com/davestewart/nuxt-layers-utils) to declare your layers once, generate the right config:
 
 ```ts
 // /<your-project>/nuxt.config.ts
@@ -703,11 +700,9 @@ export default defineNuxtConfig({
 })
 ```
 
-More information and the [full API](https://github.com/davestewart/nuxt-layers-utils#api) is available in the repo.
-
 #### Group related config
 
-Not strictly layers related, but a trick I like is to lean on [unjs/defu](https://github.com/unjs/defu) to create smaller, related sections of config, then merge them together on export:
+Lean on [unjs/defu](https://github.com/unjs/defu) to create smaller, related sections of config, then merge them together on export:
 
 ```ts
 // src/core/nuxt.config.ts
@@ -741,11 +736,9 @@ export default defineNuxtConfig({
 
 ## Last words
 
-Hopefully this section gives you some solid ideas on how to modularise your site or app – and if I've skipped over anything – ideas on how to approach it.
+Hopefully this section gives you some solid ideas on how to modularise your site or app – and if I've skipped over anything – ideas on how to approach it. Layers are generally quite logical and predicable, with a minor tradeoff of a little more configuration.
 
-Layers are generally quite logical and predicable, don't be afraid to jump in and refactor an existing site – which you can successfully do, layer-by-layer.
-
-Kudos to the UnJS and Nuxt team for the work they've done here.
+And lastly, kudos to the UnJS and Nuxt team for the work they've done here.
 
 <!--
 ## Resources
