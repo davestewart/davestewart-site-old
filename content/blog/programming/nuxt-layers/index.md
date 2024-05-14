@@ -101,14 +101,14 @@ The conceptual shift from concern to domain may feel familiar to you [if you mov
 
 So it turns out that Nuxt Layers – along with their extension superpowers can also structure a Nuxt app by domain.
 
-Nuxt Layer layers effectively create kind of "mini applications" and are combined to create the overall application.
+Nuxt layers can be viewed as kind of "mini" applications which are combined to create the "main" application.
 
 Each layer:
 
 - may contain `pages`, `components`, `server` folders, etc
 - indicates it's a layer using a `nuxt.config.ts` file
 
-And the in the main `nuxt.config.ts` file you tell Nuxt where your layers are.
+Then the main `nuxt.config.ts` tells Nuxt where your layers are.
 
 ### Example
 
@@ -137,7 +137,7 @@ For example, a small personal site might be structured as follows:
 
 The top-level layers silo related pages, components, plugins, even config.
 
-The root-level `nuxt.config.ts` then collates these layers via [unjs/c12](https://github.com/unjs/c12?tab=readme-ov-file#extending-configuration)'s `extends` keyword:
+The root-level `nuxt.config.ts` collates these layers via [unjs/c12](https://github.com/unjs/c12?tab=readme-ov-file#extending-configuration)'s `extends` keyword:
 
 ```ts
 export default defineNuxtConfig({
@@ -155,7 +155,7 @@ Note that c12 can also extend from [packages and repos](https://nuxt.com/docs/ge
 
 So that's the theory covered, *let's see some code!*
 
-In order to provide the actionable advice I mentioned, I wanted to conduct and commit an *actual* migration – so I've taken Sebastian Chopin's [Alpine](https://github.com/nuxt-themes/alpine/) theme demo – which gives me some content to work with – and progressively migrated it from a concern to a domain-based setup.
+In order to provide the actionable advice I mentioned, I wanted to share a real-world migration – so I've taken Sebastian Chopin's [Alpine](https://github.com/nuxt-themes/alpine/) theme demo – which gives me some content to work with – and progressively migrated it from a _concern_-based to a _domain_-based setup.
 
 The milestones in the migration are:
 
@@ -178,7 +178,7 @@ And be sure to skim the official Layers docs before continuing:
 
 ## Nuxt concerns
 
-Now that you understand how a layer-based site is structured, let's cover any adjustments you need to consider to make Nuxt's concerns work correctly under this new paradigm:
+Now that you understand how a layer-based site is structured, let's review any specifics for Nuxt's concerns to work correctly under this new paradigm:
 
 - [Framework folders](#framework-folders)
 - [Imports](#imports-and-exports)
@@ -209,21 +209,21 @@ This means you can break out concerns across layers **as you see fit** – and N
 
 ### Imports and exports
 
-Given that layers are generally self-contained, importing becomes much simper:
+Given that layers are generally self-contained, importing is simplified:
 
 ```ts
 // src/dashboard/components/User.vue
 import { queryUser } from '../services'
 ```
 
-If you want to import from another layer – and you opted for a flat layer structure – you essentially get aliases for free:
+If you want to import from another layer (and you opted for a [flat](#folder-structure) layer structure) you essentially get aliases for free:
 
 ```ts
 // src/profile/components/User.ts
 import { queryUser } from '~/dashboard/services'
 ```
 
-Otherwise, you can set up [aliases](https://nuxt.com/docs/api/nuxt-config#alias):
+Otherwise, you can set up [aliases](https://nuxt.com/docs/api/nuxt-config#alias) manually:
 
 ```ts
 // src/layers/profile/components/User.ts
@@ -309,7 +309,7 @@ export default defineNuxtConfig({
 
 ### Tailwind
 
-At the time of writing, Nuxt's [Tailwind module](https://github.com/nuxt-modules/tailwindcss) does not seem to support layers.
+At the time of writing, Nuxt's [Tailwind module](https://github.com/nuxt-modules/tailwindcss) does not pick up layers (though it's a [simple](https://nuxt.com/docs/guide/going-further/layers#multi-layer-support-for-nuxt-modules) PR).
 
 But you can easily tell Tailwind where your CSS classes can be found:
 
@@ -328,7 +328,7 @@ export default {
 
 ### Config
 
-Consider the following when working with config files:
+There are a few things to think about when considering config:
 
 - where to locate each file
 - what each file should contain
@@ -372,7 +372,7 @@ export default defineNuxtConfig({
 
 This de-clutters root-level folders and config, making it simpler to understand the rest of your app. 
 
-Note that if you move core folders you will need to reconfigure some core [dir settings](#path-config). 
+Note that if you move core folders you will need to reconfigure some core [dir settings](#path-configuration). 
 
 #### Path resolution
 
@@ -380,13 +380,13 @@ Path resolution with layers can be tricky, because of differing targets and form
 
 ```ts
 export default {
-  foo: __dirname + '/some-layer/some-folder',
-  bar: resolve('../some-folder'),
+  foo: resolve('../some-folder'),
+  bar: 'some-layer/some-folder',
   baz: '~/other-layer',
 }
 ```
 
-As there's so much to cover, I'll go into detail in the [migration](#migrating-an-existing-site) section.
+As there's a lot to cover, I'll save the detail for the [migration](#migrating-an-existing-site) section.
 
 #### Keeping code clean
 
@@ -420,19 +420,19 @@ export default defineNuxtConfig ({
 
 ## Migrating an existing site
 
-So this is it. You understand the concepts, you have an idea of what needs to change, but now you need a plan to do it.
+So you now understand the concepts, you have an idea of the updates to make, but you need a plan to do it.
 
-Below, I've outlined various tips on:
+Below, I've outlined my best advice, including:
 
 - [Folder structure](#folder-structure)
 - [Global concerns](#global-concerns)
-- [Path config](#path-config)
-- [Steps to migrate](#steps-to-migrate)
+- [Path configuration](#path-configuration)
+- [Migration steps](#migration-steps)
 - [Tips](#tips)
 
 ### Folder structure
 
-The first thing to decide when migrating your site to layers is what folder structure to settle on.
+The first thing to decide when migrating your site to layers is your ideal folder structure.
 
 You can move some or all concerns to layers:
 
@@ -494,13 +494,13 @@ You can move some or all concerns to layers:
 </table>
 </div>
 
-I prefer the hybrid or flat structure, but there's nothing stopping you from migrating progressively as your requirements or understanding of layers changes.
+I prefer the hybrid or flat structure, but there's nothing stopping you starting simple and changing your mind later.
 
 ### Global concerns
 
-As mentioned [before](#base-config) it's nice to be able to silo those domain-*less* folders and config options.
+As mentioned [earlier](#base-config) it's nice to be able to silo those domain-*less* folders and config options.
 
-For concerns which take more of a foundational role, I group under `base` / `core`:
+For concerns which take more of a foundational role, I group under `base` or `core`:
 
 ```
 +- src
@@ -528,7 +528,7 @@ If a concern spans multiple domains, or isn't specific enough to get its own dom
         +- ...
 ```
 
-Note that if you move Nuxt's default folders, you will need to reconfigure the paths to them:
+Note that if you move any default folders, you will need to tell Nuxt:
 
 ```ts
 // src/nuxt.config.ts
@@ -536,27 +536,27 @@ export default defineNuxtConfig({
   publicDir: 'core/public',
   dir: {
     assets: 'core/assets',
-    middleware: 'core/middleware',
     modules: 'core/modules',
+    middleware: 'core/middleware',
   },
 })
 ```
 
-### Path config
+### Path configuration
 
 The correct path configurations (**target** and **format**) are _critical_ to Nuxt finding concerns moved to layers.
 
 #### A review of Nuxt's path-related config
 
-Nuxt's path configuration can be driven by a variety of path formats and concatenation:
+Nuxt's path configuration can be driven by a variety of path formats:
 
-| Type           | Code                               | Notes                               |
-|----------------|------------------------------------|-------------------------------------|
-| Absolute       | `__dirname + '/layers/some-layer'` | Remember to add the leading slash!  |
-| Root-relative  | `layers/some-layer`                |                                     |
-| Layer-relative | `some-layer`                       |                                     |
-| Alias          | `~/layers/some-layer`              | Expands internally to absolute path |
-| Glob           | `some-layer/**/*.vue`              | Expands to an array of paths        |
+| Type           | Code                                | Notes                               |
+|----------------|-------------------------------------|-------------------------------------|
+| Absolute       | `Path.resolve('layers/some-layer')` | You can also use `import.meta.url`  |
+| Root-relative  | `layers/some-layer`                 |                                     |
+| Layer-relative | `some-layer`                        |                                     |
+| Alias          | `~/layers/some-layer`               | Expands internally to absolute path |
+| Glob           | `some-layer/**/*.vue`               | Expands to an array of paths        |
 
 And here's a sample of the differences between some of [25+ path-related](https://github.com/davestewart/nuxt-layers-utils#nuxt-config) config options (along with some quirks):
 
@@ -592,9 +592,9 @@ export default definedNuxtConfig({
   ],
 
   alias: {
-    '#core': __dirname + '/core',
-    '#blog': __dirname + '/layers/blog',
-    '#site': __dirname + '/layers/site',
+    '#core': resolve('core'),
+    '#blog': resolve('layers/blog'),
+    '#site': resolve('layers/site'),
   },
 
   publicDir: 'core/public',
@@ -611,9 +611,9 @@ export default definedNuxtConfig({
 })
 ```
 
-Is this a little verbose? Yes... but at least it's minimal and all in once place.
+Is this a little verbose? Yes. Is it succinct and accessible? Also, yes.
 
-You may also consider using [Nuxt Layers Utils](https://github.com/davestewart/nuxt-layers-utils) which simplifies the implementation to one-liners, i.e.:
+If you want this even simpler, use [Nuxt Layers Utils](https://github.com/davestewart/nuxt-layers-utils) to abstract the implementation to simple one-liners, i.e.:
 
 ```ts
 {
@@ -623,9 +623,11 @@ You may also consider using [Nuxt Layers Utils](https://github.com/davestewart/n
 
 See the [Tips](#tips) section for a full example.
 
-### Steps to migrate
+### Migration steps
 
-Migrating an existing site isn't difficult, but you should treat it like any other major refactor and aim to go slow; migrate feature-by-feature, folder-by-folder, or file-by-file – **as things will break as you move them**.
+Migrating an existing site isn't difficult, but it can be a little risky and frustrating. 
+
+You should treat it like any other major refactor and aim to go slow; migrate feature-by-feature, folder-by-folder, or file-by-file – as your build **will** break – and there will be times when you don't know why.
 
 Set aside a few hours for a small site, and a day or more for a larger, in-production one.
 
@@ -641,8 +643,8 @@ Make a plan to work on:
 
 To start:
 
-- use an IDE like Webstorm which rewrites your paths as you move files
 - create aliases for all layers
+- use an IDE like Webstorm which rewrites your paths as you move files
 
 Then, tackle a single domain / layer at a time:
 
@@ -660,25 +662,25 @@ Then, tackle a single domain / layer at a time:
   - `components`:
     - if imported, review paths
     - if auto-imported, should just work
-    - if not, may need to add `components` paths
+    - if not, you may need to add to configure `components` (the config option) paths
   - `content`
     - decide whether content will be global or local
     - remember Nuxt Content components need to live in `components/content`
 - the things to check as you move are:
   - `paths`:
-    - remember all [config](#config) (including layer config) is compiled at root level
-    - layer-level paths may still need to be `./layer/concern` vs `./concern`
+    - remember `Path.resolve()`'s context whilst consuming `config` is your project's root folder
+    - layer-level paths may still need to be `./<layer>/<concern>` vs `./<concern>`
   - `imports`:
-    - global imports may flip from `~/concern/domain` to `~/layer/concern`
-    - local imports may become `../concern`
+    - global imports may flip from `~/<concern>/<domain>` to `~/<layer>/<concern>`
+    - local imports may become `../<concern>`
   - `config`:
-    - config `import` statements cannot use path aliases; you may need to use `../layer/concern`
+    - config `import` statements **cannot** use path aliases; you may need to use `../layer/concern`
 
 
 Some additional points as you work:
 
 - commit your changes after each successful update or set of updates
-- read and understand terminal and browser console errors
+- properly **read** and try to _understand_ terminal and browser console errors
 
 Gotchas:
 
@@ -690,7 +692,7 @@ Gotchas:
 
 #### Use Nuxt Layers Utils
 
-To simplify path-related configuration, use [Nuxt Layers Utils](https://github.com/davestewart/nuxt-layers-utils) to declare your layers then auto-generate config:
+To simplify path-related configuration, use [Nuxt Layers Utils](https://github.com/davestewart/nuxt-layers-utils) to declare your layers and auto-generate config:
 
 ```ts
 // /<your-project>/nuxt.config.ts
