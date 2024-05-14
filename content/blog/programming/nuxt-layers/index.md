@@ -11,16 +11,16 @@ media:
 
 ## Intro
 
-Nuxt 3 introduces a new paradigm called "Layers" that the docs [describe](https://nuxt.com/docs/getting-started/layers) as "a powerful system that allows you to extend the default files, configs, and much more". Whilst this explanation may be _technically_ accurate, the emphasis on "extending" overlooks a more everyday use case, that of siloing application content by *domain (vs concern)*.
+Nuxt 3 introduces a new paradigm called "Layers" that the docs [describe](https://nuxt.com/docs/getting-started/layers) as "a powerful system that allows you to extend the default files, configs, and much more". Whilst this explanation may be _technically_ accurate, the emphasis on "extending" overlooks a more everyday use case, that of "structuring" your application by *domain (vs concern)*.
 
-To get you up to speed on the conceptual, I'll kick-off with some theory:
+To get you up-to-speed on the concepts, I'll begin with some theory:
 
 - [Site structuring](#site-structuring)<br>
   A comparison of structuring by concern vs by domain
 - [Nuxt layers intro](#nuxt-layers-intro)<br>
   A brief intro to Nuxt layers and how they work
 
-Then, share actionable steps for migrating Nuxt applications by domain: 
+Then, I'll share actionable steps to migrate an existing Nuxt application: 
 
 - [Demo](#demo)<br>
   A demo repo with tagged commits following a layers migration
@@ -39,7 +39,7 @@ Let's take a look at two main ways to structure sites and apps; by [concern](#by
 
 ### By concern
 
-Most Vue and Nuxt projects are born of simple starter templates, which group files by *concern* (pages, components, etc):
+Most Vue and Nuxt projects are born of simple starter templates, which group files by *concern* (`pages`, `components`, etc):
 
 ```
 +- src
@@ -56,11 +56,11 @@ Most Vue and Nuxt projects are born of simple starter templates, which group fil
 
 This structure is simple to understand and somewhat invisible when your site or application is small.
 
-However, as sites grow in size this grouping obfuscates the more *natural* file relationships (i.e. all blog-related concerns) which makes it hard to understand what your site or application actually *does*.
+However, as sites grow in size, this grouping obfuscates more *natural* relationships (i.e. everything related to `blog`) which makes it hard to understand what your site or application actually *does*.
 
 ### By domain
 
-At a certain size of site (and actually, not that big!) it becomes more intuitive to silo files by *domain* (blog, home, etc):
+At a certain size of site (and actually, not that big!) it becomes more intuitive to silo files by *domain* (`blog`, `home`, etc):
 
 ```
 +- src
@@ -78,7 +78,7 @@ Transposing physical locations has tangible benefits...
 
 File management:
 
-- domains (blog, home, etc) become self-contained units
+- domains (`blog`, `home`, etc) become self-contained units
 - related code will generally be located in a sibling folder
 - less open folders / scrolling / jumping in your IDE
 
@@ -99,9 +99,9 @@ The conceptual shift from concern to domain may feel familiar to you [if you mov
 
 ##  Nuxt layers intro
 
-So it turns out that Nuxt Layers – along with their extension superpowers can also structure a Nuxt app by domain.
+So it turns out that Nuxt Layers – along with their extension superpowers can also structure a Nuxt app by _domain_.
 
-Nuxt layers can be viewed as kind of "mini" applications which are combined to create the "main" application.
+Nuxt Layers can be viewed as "mini" applications which are combined to create the "main" application.
 
 Each layer:
 
@@ -135,7 +135,7 @@ For example, a small personal site might be structured as follows:
     +- nuxt.config.ts 
 ```
 
-The top-level layers silo related pages, components, plugins, even config.
+The top-level layers silo related `pages`, `components`, `plugins`, even `config`.
 
 The root-level `nuxt.config.ts` collates these layers via [unjs/c12](https://github.com/unjs/c12?tab=readme-ov-file#extending-configuration)'s `extends` keyword:
 
@@ -584,6 +584,8 @@ My experience has led me to the conclusion that ***it's just simpler to configur
 As such, your core `nuxt.config.ts` file might look something like this:
 
 ```ts
+import { resolve } from 'pathe'
+
 export default definedNuxtConfig({
   extends: [
     'core',
