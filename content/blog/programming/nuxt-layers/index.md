@@ -157,16 +157,18 @@ So that's the theory covered, *let's see some code!*
 
 In order to provide the actionable advice I mentioned, I wanted to share a real-world migration – so I've taken Sebastian Chopin's [Alpine](https://github.com/nuxt-themes/alpine/) theme demo – which gives me some content to work with – and progressively migrated it from a _concern_-based to a _domain_-based setup.
 
-The milestones in the migration are:
+The [milestones](https://github.com/davestewart/nuxt-layers-demo/commits/main/) in the migration are:
 
-- `0.1.0` – **[Alpine starter repo](#)**<br>
+- `0.1.0` – **[Alpine starter repo](https://github.com/davestewart/nuxt-layers-demo/tree/16f9e7a0a9555d889d236d2f36f8a7f040105d4a)**<br>
   Local content extending external theme
-- `0.5.0` – **[Combined theme and content](#)**<br>
-  Local content and theme, traditional flat folder structure (by concern)
-- `1.0.0` – **[Manually configured base, theme and content](#)**<br>
-  Initial migration to layers (by domain, but somewhat brittle)
-- `1.1.0` – **[Automatically configured base, theme and content](#)**<br>
-  Implement Nuxt Layers Utils (by domain, but flexible)
+- `0.5.0` – **[Combined theme and content](https://github.com/davestewart/nuxt-layers-demo/tree/8eb099e84d89204466e9ac7c8b3eb74eabc100af)**<br>
+  Local content and theme, with a traditional flat folder structure (by concern)
+- `1.0.0` – **[Refactor to flat layers](https://github.com/davestewart/nuxt-layers-demo/tree/a9345e527f340c71a5de286a19e19b90edc2d25c)**<br>
+  Repackage to core, site and articles layers (by domain)
+- `1.1.0` – **[Refactor layers to subfolder](https://github.com/davestewart/nuxt-layers-demo/tree/e022ec2f995128a4287ffa5bbedccbf40ec77594)**<br>
+  Move site and articles to sub-folder (by domain, but neater)
+- `1.2.0` – **Refactor using Nuxt Layers Utils** (TBC)<br>
+  Migrate path configuration to root (by domain, but simpler)
 
 You can clone or browse the repo from here:
 
@@ -773,7 +775,8 @@ Then, tackle a single domain / layer at a time:
 
 As you make changes:
 
-- manually check related pages, components, modules, plugins, etc 
+- restart the server _often_
+- manually check related pages, components, modules, plugins, etc
 - commit your changes after each successful update or set of updates
 
 When errors occur:
