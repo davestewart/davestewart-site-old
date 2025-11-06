@@ -12,47 +12,6 @@ This article is a companion section for the [Data Fetching in Nuxt](/blog/nuxt-d
 
 <NavToc type="tree" exclude="cookbook" level="2,3" prompt="Contents" />
 
-## Getting Started
-
-### Calling external APIs
-
-**From API handlers** when:
-
-- You need to hide API keys (via [runtime config](https://nuxt.com/docs/4.x/guide/going-further/runtime-config))
-- You want to transform/combine data before sending to client
-- The external API doesn't support CORS
-
-**Directly from components** when:
-
-- The API is public and supports CORS
-- You want client-side only fetching
-- You're ok exposing the API call to the client
-
-```vue
-<script setup>
-// calling external API directly from component
-const { data } = await useFetch('https://api.publicdata.com/items')
-</script>
-```
-
-### Shared server logic
-
-For shared server logic, use `server/utils/`:
-
-```js
-// server/utils/db.js
-export function getPosts() {
-  return db.select().from('posts')
-}
-```
-
-```js
-// server/api/posts.js
-export default defineEventHandler(async (event) => {
-  return await getPosts()
-})
-```
-
 ## Data Fetching Patterns
 
 ### Basic fetching
@@ -73,9 +32,7 @@ const { data: posts } = await useAsyncData('posts', () => $fetch('/api/posts'))
 
 **For `useAsyncData`:** You must provide the key as the first argument
 
-### Conditional and lazy loading
-
-#### Client-only fetching
+### Client-only fetching
 
 To fetch only on the client (skipping SSR), set `server: false`:
 
@@ -112,7 +69,7 @@ const { status, data } = await useFetch('/api/comments', {
 
 **Critical:** If you have not fetched data on the server (with `server: false`), the data will **not** be fetched until hydration completes. This means even if you `await useFetch` on client-side, `data` will remain null within `<script setup>` until the component mounts.
 
-#### Delayed fetching
+### Delayed fetching
 
 To wait for user interaction before fetching, use `immediate: false`:
 
@@ -182,6 +139,20 @@ const { data: notifications } = useFetch('/api/notifications')
 const { data: stats } = useFetch('/api/stats')
 
 // navigation waits for all three to complete
+</script>
+```
+
+### Side effects
+
+Don't use `useAsyncData` for triggering side effects, for example calling Pinia actions or mutations, as this can cause unintended repeated executions. For one-time side effects, use the `callOnce` utility instead:
+
+```vue
+<script setup>
+// ❌ Don't do this
+await useAsyncData(() => offersStore.getOffer(route.params.slug))
+
+// ✅ Do this instead
+await callOnce(() => offersStore.getOffer(route.params.slug))
 </script>
 ```
 
@@ -497,6 +468,47 @@ The `dedupe` option controls how duplicate requests are handled:
 // 'cancel' - cancel previous requests when a new one starts
 const { data } = await useFetch('/api/data', { dedupe: 'cancel' })
 </script>
+```
+
+### Calling external APIs
+
+You can choose where to call external APIs from.
+
+**From API handlers** when:
+
+- You need to hide API keys (via [runtime config](https://nuxt.com/docs/4.x/guide/going-further/runtime-config))
+- You want to transform/combine data before sending to client
+- The external API doesn't support CORS
+
+**Directly from components** when:
+
+- The API is public and supports CORS
+- You want client-side only fetching
+- You're ok exposing the API call to the client
+
+```vue
+<script setup>
+// calling external API directly from component
+const { data } = await useFetch('https://api.publicdata.com/items')
+</script>
+```
+
+### Shared server logic
+
+For shared server logic, use `server/utils/`:
+
+```js
+// server/utils/db.js
+export function getPosts() {
+  return db.select().from('posts')
+}
+```
+
+```js
+// server/api/posts.js
+export default defineEventHandler(async (event) => {
+  return await getPosts()
+})
 ```
 
 ## Advanced Configuration
