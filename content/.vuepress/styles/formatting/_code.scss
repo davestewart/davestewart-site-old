@@ -45,6 +45,12 @@ code {
   color: #5c6e74;
 }
 
+h3, h4, h5, h6 {
+  code {
+    font-size: 80%;
+  }
+}
+
 blockquote code {
   background: darken($codeBg, 5%) !important;
 }
