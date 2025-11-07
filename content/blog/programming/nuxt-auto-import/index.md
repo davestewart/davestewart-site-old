@@ -164,8 +164,11 @@ For `imports` – for which the defaults are generally fine – the [options](ht
 // src/nuxt.config.ts
 export default defineNuxtConfig({
   imports: {
-    // optionally disable
+    // optionally disable (Nuxt 3)
     autoImport: false,
+    
+    // optionally disable (Nuxt 4)
+    scan: false,
     
     // load all composables at all depths
     dirs: [
