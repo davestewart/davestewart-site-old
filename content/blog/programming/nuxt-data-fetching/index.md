@@ -17,7 +17,9 @@ media:
 
 One of the most common questions when building Nuxt applications is "how do I fetch data correctly?". In isomorphic frameworks like Nuxt, code runs on both server and client, making asking "where" and "when" equally as important.
 
-Before diving into the tools, we'll unpack Nuxt's render lifecycle to understand how state gets serialized, transferred, and rehydrated across the server-client boundary. With a full understanding of isomorphic rendering, we'll then dig into the individual [`$fetch`](#fetch-a-better-http-client), [`useAsyncData`](#useasyncdata-adding-ssr-awareness) and [`useFetch`](#usefetch-the-convenience-wrapper) helpers before covering general usage, reference and examples.
+Before diving into the tools, we'll unpack Nuxt's render lifecycle to understand how state gets serialized, transferred, and rehydrated across the server-client boundary.
+
+With a full understanding of isomorphic rendering, we'll then dig into the individual [`$fetch`](#fetch-a-better-http-client), [`useAsyncData`](#useasyncdata-adding-ssr-awareness) and [`useFetch`](#usefetch-the-convenience-wrapper) helpers before covering general usage, reference and examples.
 
 > **Disclaimer**: as with most of my [Nuxt articles](/?s=nuxt) I wrote this to clarify my own understanding of Nuxt's JS voodoo!
 
@@ -94,7 +96,7 @@ You've now made two identical requests for the same data. This is known as the "
 
 #### The idiomatic (Nuxt) way
 
-For our posts page, we can use [`useFetch`](#usefetch---the-convenience-wrapper) instead of plain `fetch`:
+For our posts page, we should use [`useFetch`](#usefetch---the-convenience-wrapper) instead of plain `fetch`:
 
 ```vue
 <script setup>
@@ -119,7 +121,7 @@ On the server:
 In the browser:
 
 - The rendered HTML is immediately visible and the [hydration](https://nuxt.com/docs/4.x/guide/concepts/rendering#universal-rendering) process re-renders the component (as before)
-- The data is immediately available to the component via the globally-embedded payload
+- The data is immediately available to the component from Nuxt's state cache, pre-populated from the payload
 - Nuxt **skips the second fetch** because the data is already there
 
 On subsequent visits to the page:
