@@ -45,8 +45,8 @@ To do this, the same Vue component code runs in both server and the client envir
 
 On any given page load:
 
-- The server fetches any data and renders the HTML, providing a fast initial load and good SEO
-- The client re-renders the same page, and [hydrates](https://vuejs.org/guide/scaling-up/ssr#client-hydration) the DOM tree, turning the static page into a live application
+- The server fetches any data and renders static HTML, providing a fast initial load and good SEO
+- The client re-renders the same page, and [hydrates](#what-exactly-is-hydration) the DOM tree, turning the static page into a live application
 - On subsequent page visits, the client fetches any data and re-renders the page, with no need for hydration
 
 This creates a complex problem: **where and when should data fetching happen?** 
@@ -82,7 +82,7 @@ On the server:
 In the browser:
 
 - The fully-rendered HTML is received with all the posts visible immediately
-- Vue begins the [hydration](https://nuxt.com/docs/4.x/guide/concepts/rendering#universal-rendering) process to make the page interactive (to do this, it runs the component code again)
+- Vue begins the [hydration](#what-exactly-is-hydration) process to make the page interactive (to do this, it runs the component code again)
 - The component makes an HTTP request to `/api/posts` to get the data (even though the data is already rendered)
 
 You've now made two identical requests for the same data. This is known as the "double fetch problem."
@@ -120,7 +120,7 @@ On the server:
 
 In the browser:
 
-- The rendered HTML is immediately visible and the [hydration](https://nuxt.com/docs/4.x/guide/concepts/rendering#universal-rendering) process re-renders the component (as before)
+- The rendered HTML is immediately visible and the [hydration](#what-exactly-is-hydration) process re-renders the component (as before)
 - The data is immediately available to the component from Nuxt's state cache, pre-populated from the payload
 - Nuxt **skips the second fetch** because the data is already there
 
@@ -131,6 +131,20 @@ On subsequent visits to the page:
 - It blocks the navigation transition until the data is ready
 
 As you can see, Nuxt is jumping through a lot of hoops on your behalf to mitigate the issues of server/client boundaries!
+
+### What exactly *is* hydration?
+
+> Although not directly related to data fetching, I feel the mechanism of "hydration" is often glossed over, so I'll attempt to define it here for the purpose of completeness.
+
+As mentioned, for a Nuxt app to deliver SEO-friendly HTML as quickly as possible on initial load, it renders the current page on the server. This process involves routing, component loading, setup scripts running, data fetching, template rendering etc, but *not* anything that would only happen in the client (such as executing `onMount` or adding `click` handlers, etc).
+
+A snapshot of the current state of the app is then rendered as raw HTML and is passed to the client (the browser) but crucially at this point, without JavaScript or interactivity. However, the user expects a running application, so we need a way to make the various page elements interactive. This process is called [hydration](https://vuejs.org/guide/scaling-up/ssr#client-hydration), and is named such as the rendered DOM nodes have interactivity breathed into them on a node-by-node basis. 
+
+The way it works is, the running instance of Vue on the client builds a brand new copy of the current page, and [if everything goes well](https://vuejs.org/guide/scaling-up/ssr#hydration-mismatch) we get exactly the same HTML/DOM structure as the non-interactive server-rendered version. However, rather than replacing the existing page (as it would in pure client-side rendering) Vue walks the existing nodes, verifying they match with the virtual nodes.
+
+As it traverses this tree, Vue [attaches event listeners to elements](https://github.com/vuejs/core/blob/e131369833d71b2c9e8bbafda427d331ef59a6fd/packages/runtime-core/src/hydration.ts#L515), connects `ref` objects to their corresponding DOM nodes, and sets up the reactivity system to track data changes. This transforms the static HTML into a live component tree where data flows through props, reactive state updates trigger re-renders, and user interactions invoke the correct event handlers.
+
+For more information on Vue's' hydration constraints [check the Vue docs](https://vuejs.org/guide/scaling-up/ssr#writing-ssr-friendly-code).
 
 ## Nuxt's isomorphic-aware tooling
 
@@ -419,7 +433,7 @@ const {
 </script>
 ```
 
-> Interestingly, the return value from `useAsyncData` is actually an enhanced `Promise` object; you can `await` it or *not* `await` it and it will still destructure! See [this article](https://masteringnuxt.com/blog/async-and-sync-how-useasyncdata-does-it-all) from Michael Thiessen to see exactly how it's done.
+> Interestingly, the return value from `useAsyncData` is actually an enhanced `Promise` object; you can `await` it or *not* `await` it and it will still work, and destructure! See [this article](https://masteringnuxt.com/blog/async-and-sync-how-useasyncdata-does-it-all) from Michael Thiessen to see exactly how it's done.
 
 Note that the returned properties are Vue refs, so access them with `.value` in JavaScript:
 
