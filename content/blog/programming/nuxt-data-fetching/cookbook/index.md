@@ -26,7 +26,10 @@ This article is a companion section for the [Data Fetching in Nuxt](/blog/nuxt-d
 const { data: users } = await useFetch('/api/users')
 
 // More control with useAsyncData
-const { data: posts } = await useAsyncData('posts', () => $fetch('/api/posts'))
+const { data: posts } = await useAsyncData('posts', () => {
+  // run additional code here
+  return $fetch('/api/posts')
+})
 </script>
 ```
 
@@ -59,7 +62,7 @@ const { data: comments } = await useFetch('/api/comments', {
 <script setup>
 const { status, data } = await useFetch('/api/comments', {
   server: false,
-  lazy: true  // often combined with server: false
+  lazy: true, // often combined with server: false
 })
 </script>
 
@@ -146,7 +149,7 @@ const { data: stats } = useFetch('/api/stats')
 
 ### Side effects
 
-Don't use `useAsyncData` for triggering side effects, for example calling Pinia actions or mutations, as this can cause unintended repeated executions. For one-time side effects, use the `callOnce` utility instead:
+Don't use `useAsyncData` for triggering side effects, for example calling Pinia actions or mutations, as this can cause unintended repeated executions. For one-time side effects, use the [`callOnce`](https://nuxt.com/docs/4.x/api/utils/call-once) utility instead:
 
 ```vue
 <script setup>
@@ -347,6 +350,88 @@ clearNuxtData()
 </script>
 ```
 
+## API Setup
+
+### Basic API handler
+
+Set up endpoints, one per file in the `server/api` directory:
+
+```js
+// server/api/posts.js
+export default defineEventHandler(async (event) => {
+  // Fetch from external API
+  const example = await $fetch('https://api.example.com/data')
+  
+  // Direct database call
+  const posts = await db.query('SELECT * FROM posts')
+  
+  return posts
+})
+```
+
+Call from components using any of the [data fetching patterns](#data-fetching-patterns).
+
+See the [Nuxt server docs](https://nuxt.com/docs/4.x/guide/directory-structure/server) for more information and extensive examples.
+
+### Shared server logic
+
+For shared server logic, use `server/utils/`:
+
+```js
+// server/utils/db.js
+export function getPosts() {
+  return db.select().from('posts')
+}
+```
+
+```js
+// server/api/posts.js
+export default defineEventHandler(async (event) => {
+  return await getPosts()
+})
+```
+
+### Calling external APIs
+
+You can choose where to call external APIs from.
+
+**Directly from components** when:
+
+- The API is public and supports CORS
+- You want client-side only fetching
+- You're ok exposing the API call to the client
+
+**From API handlers** when:
+
+- You need to hide API keys (via [runtime config](https://nuxt.com/docs/4.x/guide/going-further/runtime-config))
+- You want to transform/combine data before sending to client
+- The external API doesn't support CORS
+
+### Server-sent events
+
+For [SSE](https://medium.com/@saadamd/server-sent-events-in-nuxt-3-a-beginners-guide-to-real-time-features-c8e760207aca) via GET, use the browser's `EventSource` or VueUse's `useEventSource`.
+
+For SSE via POST, handle the stream manually:
+
+```ts
+// make POST request to SSE endpoint
+const response = await $fetch<ReadableStream>('/api/chat', {
+  method: 'POST',
+  body: { query: 'Hello' },
+  responseType: 'stream'
+})
+
+// read the stream
+const reader = response.pipeThrough(new TextDecoderStream()).getReader()
+
+while (true) {
+  const { value, done } = await reader.read()
+  if (done) break
+  
+  console.log('Received:', value)
+}
+```
+
 ## Request and Response Control
 
 ### Headers and cookies
@@ -470,47 +555,6 @@ The `dedupe` option controls how duplicate requests are handled:
 // 'cancel' - cancel previous requests when a new one starts
 const { data } = await useFetch('/api/data', { dedupe: 'cancel' })
 </script>
-```
-
-### Calling external APIs
-
-You can choose where to call external APIs from.
-
-**From API handlers** when:
-
-- You need to hide API keys (via [runtime config](https://nuxt.com/docs/4.x/guide/going-further/runtime-config))
-- You want to transform/combine data before sending to client
-- The external API doesn't support CORS
-
-**Directly from components** when:
-
-- The API is public and supports CORS
-- You want client-side only fetching
-- You're ok exposing the API call to the client
-
-```vue
-<script setup>
-// calling external API directly from component
-const { data } = await useFetch('https://api.publicdata.com/items')
-</script>
-```
-
-### Shared server logic
-
-For shared server logic, use `server/utils/`:
-
-```js
-// server/utils/db.js
-export function getPosts() {
-  return db.select().from('posts')
-}
-```
-
-```js
-// server/api/posts.js
-export default defineEventHandler(async (event) => {
-  return await getPosts()
-})
 ```
 
 ## Advanced Configuration
@@ -723,32 +767,7 @@ console.log(data.value.map instanceof Map)    // true
 </script>
 ```
 
-## Special Use Cases
-
-### Server-sent events
-
-For SSE via GET, use the browser's `EventSource` or VueUse's `useEventSource`.
-
-For SSE via POST, handle the stream manually:
-
-```ts
-// make POST request to SSE endpoint
-const response = await $fetch<ReadableStream>('/api/chat', {
-  method: 'POST',
-  body: { query: 'Hello' },
-  responseType: 'stream'
-})
-
-// read the stream
-const reader = response.pipeThrough(new TextDecoderStream()).getReader()
-
-while (true) {
-  const { value, done } = await reader.read()
-  if (done) break
-  
-  console.log('Received:', value)
-}
-```
+## Misc
 
 ### Options API support
 
