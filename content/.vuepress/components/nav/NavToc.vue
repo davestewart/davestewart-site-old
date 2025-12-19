@@ -83,9 +83,9 @@ export default {
 
       // props
       const levels = split(this.level).map(level => parseInt(level))
-      const excludes = split(this.exclude)
+      const excludes = this.exclude ? split(this.exclude) : []
       const fromIndex = items.findIndex(item => item.slug === this.from)
-      const toIndex = items.findIndex(item => item.slug === this.to - 1)
+      const toIndex = items.findIndex(item => item.slug === this.to)
 
       // section
       if (this.section) {
@@ -115,7 +115,7 @@ export default {
 
       // slice if from or to and included
       if (toIndex > -1) {
-        items = items.slice(0, toIndex - 1)
+        items = items.slice(0, toIndex + 1)
       }
       if (fromIndex > -1) {
         items = items.slice(fromIndex)
@@ -160,10 +160,19 @@ export default {
       const prompt = this.prompt
       const { levels, items, tips } = this.options
 
+      // check for items
+      if (!items.length) {
+        const filteredProps = Object.fromEntries(Object.entries(this.$props).filter(entry => !!entry[1] || (Array.isArray(entry[1]) && entry[1].length > 0)))
+        console.warn(`NavToc: no items resolved for props`, JSON.stringify(filteredProps, null,  '  '))
+        return ''
+      }
+
       // generate html
       if (levels.length) {
         // set depth
-        this.depth = levels[levels.length - 1] - 1
+        if (this.type === 'tree') {
+          this.depth = levels[levels.length - 1] - 1
+        }
 
         // list
         if (this.hasHierarchy) {
