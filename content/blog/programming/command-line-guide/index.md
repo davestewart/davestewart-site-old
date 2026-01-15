@@ -1,28 +1,27 @@
 ---
 title: A Web Developer's Guide to the Command Line
-description: A comprehensive guide to mastering the Unix command line for web developers—from fundamental concepts to advanced techniques, customization, and shell selection.
-date: 2025-12-18
+description: A comprehensive guide to mastering the Unix command line for web developers—from fundamental concepts to advanced techniques, customisation, and shell selection.
+_date: 2025-12-18
+draft: true
 ---
 
 # A Web Developer's Guide to the Command Line
 
 ## Intro
 
-If you're a web developer, you probably spend most of your time in your IDE clicking through GUIs, and running the occasional `npm install`. But every time you need to batch-rename files, debug a deployment script, or automate something tedious, you're probably Googling or asking AI and copying and pasting commands you don't understand.
+If you're a web developer without have a solid grasp of the command line, you're not alone.
 
-I was the same, and these days increasingly leaning on Claude to do the work for me, but I reached an inflection point where I realized I needed to understand the command line better if I wanted to be more effective and autonomous.
+Recently, I've turned from Google to Claude to help me write commands and scripts to get things done, but doing this I realised I didn't really understand the fundamentals of how the command line actually works, so rather than just asking for commands, I changed my approach and began to ask more foundational questions.
 
-**So that's what this guide is for.**
+This guide is the result of multiple sessions of questioning and editing with [Claude](https://claude.ai), attempting to cover everything from the very basics to advanced topics, with ample context, examples, and explanations. It aims to be exhaustive, yet intuitive; a "one-stop shop" for web developers wanting to get comfortable and confident with the command line.
 
-It's the result of a multiple rounds of questioning and editing between Claude and I, going from basics to advanced topics, with ample context, examples, and explanations; assuming nothing, whilst attempting to be exhaustive.
-
-You will probably recognise many of the commands and patterns, even if you're not familiar with them. As such, this guide aims to be a one-stop-shop for web developers wanting to get comfortable and confident with the command line.
-
-By the end, you won't be a Unix wizard, but you'll be comfortable enough to stop googling "how to recursively delete node_modules" and start actually understanding what `find . -name "node_modules" -type d -prune -exec rm -rf {} +` does (and why it's better than `rm -rf **/node_modules`).
+By the end you'll know enough to stop googling "how to recursively delete node_modules" and actually understand what `find . -name "node_modules" -type d -prune -exec rm -rf {} +` does, and why it's better than `rm -rf **/node_modules`!
 
 Let's dive in.
 
 ## Contents
+
+This is a long, one-page guide, but each section has its own table of contents for easy navigation.
 
 <NavToc 
   type="list"
@@ -34,7 +33,7 @@ Let's dive in.
 <NavToc 
   type="list"
   prompt="Up and running"
-  from="real-world-patterns"
+  from="essential-patterns"
   to="simple-scripting">
 </NavToc>
 
@@ -63,6 +62,13 @@ Before we dive into commands and pipelines, let's cover the absolute basics.
 When you open Terminal (macOS) or a terminal emulator (Linux), you're not directly talking to the operating system. Instead, you're talking to a **shell** - a program that interprets your text commands and executes them. Think of it as a translator between you and the computer.
 
 The most common shell is **bash** (Bourne Again Shell), though macOS now defaults to **zsh** (Z Shell). They're very similar, and everything in this guide works in both unless noted otherwise.
+
+### Why Use the Command Line?
+
+### What makes the command line different from a graphical interface?
+
+
+
 
 ### Opening Your Terminal
 
@@ -120,31 +126,6 @@ projects/myapp
 ../other-project    # goes up one level then into other-project
 ./script.sh         # explicit current directory
 ```
-
-**Directory shortcuts:**
-
-```bash
-.                   # current directory
-..                  # parent directory
--                   # previous directory
-
-cd ..               # up one level
-cd ../..            # up two levels
-cd -                # go back to previous directory
-```
-
-**Your home directory** is where you live:
-
-```bash
-~                   # shorthand for home
-$HOME               # environment variable
-
-cd                  # with no args, goes home
-cd ~                # explicit
-cd ~/projects       # relative to home
-```
-
-The key insight: everything is a file (even devices and processes), and the filesystem is one unified tree. You navigate it with paths, either absolute from `/` or relative from where you are. Your home `~` is your personal space, `/usr` is shared programs, `/etc` is configuration, and `/tmp` is scratch space.
 
 **Directory shortcuts:**
 
@@ -416,6 +397,8 @@ At its core, the command line is about running programs with arguments: `command
 
 Commands can take **options** (flags) which typically start with `-` for short form like `-a` or `--` for long form like `--all`. You can often combine short flags together: `-la` is the same as `-l -a`.
 
+<NavToc type="list" section="command-line-fundamentals" level="3"></NavToc>
+
 ### Streams and Redirection
 
 **What are streams?** Think of streams as channels for data flow. Every command has three standard streams - they're like pipes that data flows through:
@@ -538,25 +521,6 @@ This is useful for:
 
 We'll cover more advanced job control (pausing, resuming, bringing to foreground) in the [Advanced Techniques](#job-control) section.
 
-### Substitution
-
-Command substitution with `$(command)` lets you use one command's output as another's argument:
-
-```bash
-echo "Today is $(date)"  # echo prints text to stdout
-rm $(find . -name "*.tmp")
-```
-
-The older backtick syntax `` `command` `` does the same thing but is less flexible.
-
-Process substitution with `<(command)` creates a temporary file-like input:
-
-```bash
-diff <(ls dir1) <(ls dir2)
-```
-
-This compares directory listings without creating actual files.
-
 ### Variables and Environment
 
 **Variables** let you store values and reuse them:
@@ -594,6 +558,12 @@ PORT=3000 npm start  # PORT is only available to npm
 echo $PATH           # see where commands are found
 echo $HOME           # /home/dave
 echo "I'm $USER"     # I'm dave
+```
+
+To display a list of all set environment variables:
+
+```bash
+printenv
 ```
 
 **Wildcards** (also called globs) expand to matching filenames:
@@ -723,6 +693,8 @@ This processes JSON with `jq` (a JSON processor that can query and transform), f
 
 Before you can become self-sufficient, you need to know how to find answers.
 
+<NavToc type="list" section="getting-help" level="3"></NavToc>
+
 ### Built-in Help
 
 Most commands support `--help` or `-h`:
@@ -824,9 +796,11 @@ This is often more useful than man pages when you just want to see "how do I act
 
 The trick is knowing the hierarchy: try `--help` first (fast, focused), then `man` for details, then `info` for GNU tools, then Google when you need examples or explanations. And `apropos` is underrated when you know *what* you want to do but not *which* command does it.
 
-## Real-World Patterns
+## Essential Patterns
 
 Theory is great, but here are the patterns you'll actually use and the gotchas you'll encounter.
+
+<NavToc type="list" section="essential-patterns" level="3"></NavToc>
 
 ### Quoting Rules and Gotchas
 
@@ -1010,6 +984,8 @@ cat file.txt | grep "pattern"  # reads from pipe
 
 These techniques give you fine-grained control when you need it.
 
+<NavToc type="list" section="advanced-techniques" level="3"></NavToc>
+
 ### Here Documents and Here Strings
 
 **Here documents** (`<<`) let you pass multi-line input directly:
@@ -1081,6 +1057,15 @@ kill -9 PID  # sends SIGKILL (immediate termination, can't be caught)
 command &    # won't be killed by Ctrl-C
 ```
 
+Common commands (explain):
+
+```bash
+pkill -f "nuxt\|nitro\|vite"
+```
+```bash
+lsof -ti:24678 | xargs kill -9
+```
+
 ### Job Control
 
 We covered [background processes](#background-processes) earlier with the `&` operator. Here's how to manage them once they're running:
@@ -1096,9 +1081,11 @@ disown       # detach job so it survives shell exit
 
 This is essential when you've accidentally started a long-running process in the foreground.
 
-## Customization and Configuration
+## Customisation and Configuration
 
 Make the shell work the way you want it to.
+
+<NavToc type="list" section="customisation-and-configuration" level="3"></NavToc>
 
 ### Profile Files
 
@@ -1123,7 +1110,7 @@ When you open a terminal, bash reads configuration files in order:
 **Interactive shells** (new terminal windows):
 
 ```bash
-~/.bashrc           # most customization goes here
+~/.bashrc           # most customisation goes here
 ```
 
 **On exit:**
@@ -1205,7 +1192,7 @@ export NODE_ENV=development
 export HISTSIZE=10000           # command history length
 export HISTFILESIZE=20000
 
-# prompt customization
+# prompt customisation
 export PS1='\u@\h:\w\$ '       # user@host:path$
 ```
 
@@ -1229,6 +1216,8 @@ So far we've been typing commands interactively - one at a time. But what if you
 A shell script is just a text file containing commands. Instead of typing them one by one, you save them in a file and run them all at once. Scripts can include all the patterns we've covered - pipes, conditionals, loops, variables - making them powerful automation tools.
 
 Let's move from interactive commands to reusable automation.
+
+<NavToc type="list" section="simple-scripting" level="3"></NavToc>
 
 ### Shebang and Execution
 
@@ -1498,6 +1487,8 @@ The key difference: **profile commands** configure your interactive shell experi
 
 Unix was designed as a multi-user system from the start. Multiple people can use the same computer, each with their own files, and the system needs to prevent users from accidentally (or maliciously) interfering with each other's work or critical system files.
 
+<NavToc type="list" section="users-permissions-and-security" level="3"></NavToc>
+
 ### Why Permissions Exist
 
 Permissions solve three problems:
@@ -1727,6 +1718,8 @@ Reaching for `sudo chmod 777` is like responding to a locked door by tearing dow
 
 ## Shells and Shell Frameworks
 
+<NavToc type="list" section="shells-and-shell-frameworks" level="3"></NavToc>
+
 ### What is a Shell, Really?
 
 Everything we've covered so far has been about using bash—but bash is just one of many shells. A shell is the program that interprets your commands and talks to the operating system. It's the layer between you and the **kernel** (the core of the operating system that manages hardware, memory, and processes).
@@ -1761,7 +1754,7 @@ Different shells exist because they make different trade-offs: compatibility vs 
 - Started in 1990, modernized over time
 - Compatible with bash scripts (mostly)
 - Better interactive features: better tab completion, spelling correction, shared history across sessions
-- More powerful customization
+- More powerful customisation
 - Supports plugins and themes
 
 **Strengths:** Modern features while maintaining compatibility, excellent tab completion, better defaults, huge plugin ecosystem (thanks to [oh-my-zsh](https://ohmyz.sh/)).
@@ -1871,7 +1864,7 @@ eval "$(starship init bash)"  # or zsh, fish, etc.
 
 **Pros:** Fast, gorgeous, cross-shell, single config file, minimal setup.
 
-**Cons:** Limited to prompt customization (doesn't provide plugins or aliases).
+**Cons:** Limited to prompt customisation (doesn't provide plugins or aliases).
 
 **When to use it:** You want a beautiful, informative prompt without committing to a full framework. You switch between shells.
 
@@ -2051,6 +2044,8 @@ The command line isn't going anywhere. The tools we covered—pipes, redirection
 Now go forth and `rm -rf` with confidence. (But maybe double-check that path first.)
 
 ## Quick Reference
+
+<NavToc type="list" section="quick-reference" level="3"></NavToc>
 
 ### Filesystem Navigation
 
