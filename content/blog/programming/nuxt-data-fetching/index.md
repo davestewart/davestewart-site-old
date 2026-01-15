@@ -15,9 +15,9 @@ media:
 
 ## Intro
 
-One of the most common questions when building Nuxt applications is "how do I fetch data correctly?". In isomorphic frameworks like Nuxt, code runs on both server and client, making asking "where" and "when" equally as important.
+One of the most common questions when building Nuxt applications is "how do I fetch data correctly?". In isomorphic frameworks like Nuxt, components run on server and client, making asking "where" and "when" equally as important.
 
-Before diving into the tools, we'll unpack Nuxt's render lifecycle to understand how state gets serialized, transferred, and rehydrated across the server-client boundary.
+Before diving into the tools, we'll unpack Nuxt's render lifecycle to understand where components are rendered, and how their state gets serialized, transferred, and rehydrated across the server-client boundary.
 
 With a full understanding of isomorphic rendering, we'll then dig into the individual [`$fetch`](#fetch-a-better-http-client), [`useAsyncData`](#useasyncdata-adding-ssr-awareness) and [`useFetch`](#usefetch-the-convenience-wrapper) helpers before covering general usage, reference and examples.
 
@@ -35,7 +35,7 @@ In traditional web applications, data fetching is straightforward because it hap
 
 Traditional server-side applications (such as PHP or Ruby on Rails) fetch data on the server, render the HTML, then send it to the browser. The browser simply displays the HTML. This approach is simple and provides fast initial loads, but offers limited interactivity since new content requires requesting and rendering new pages from scratch.
 
-Traditional client-rendered applications (single-page apps) work differently. The browser loads skeleton HTML and JavaScript, then the application starts, fetches data, and renders the application. This provides rich interactivity and smooth navigation between pages, but results in slower initial loads and poor SEO since search engines see empty pages.
+Traditional client-rendered applications (single-page apps) work differently. The browser loads skeleton HTML and JavaScript, then the application starts, fetches data in the client, and renders the application. This provides rich interactivity and smooth navigation but results in slower initial loads and poor SEO as search engines see empty pages.
 
 #### Isomorphic applications
 
